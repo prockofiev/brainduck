@@ -1,5 +1,10 @@
 import re
+from methods import Methods
 from variables import Variables
+
+
+method = Methods()
+
 
 def blocking( code: str ) -> list[ str ]:
     openBrackets = 0
@@ -27,16 +32,32 @@ def clearCode( code: str ) -> str:
     return code
 
 
+def expressionRender( result: Variables, expression: str ):
+    if re.fullmatch( r"\d+", expression ):
+        value = re.match( r"(\d+)", expression ).groups()[ 0 ]
+        method.addValueForVariable( var = result, value = int( value ) )
+
+
 def execute( block: str ) -> str:
-    result = ''
     if re.fullmatch( r"def\[\d+\]\s+\w+", block ):
         size, name = re.match( r"def\[(\d+)\]\s+(\w+)", block ).groups()
         Variables( name = name, size = int( size ) )
     elif re.fullmatch( r"del\s+\w+", block ):
         name = re.match( r"del\s+(\w+)", block ).groups()[ 0 ]
         Variables.getByName( name = name ).remove()
+    elif re.fullmatch( r"\w+\s+=\s+.+", block ):
+        name, expression = re.match( r"(\w+)\s+=\s+(.+)", block ).groups()
 
-    return result
+        variable = Variables.getByName( name = name )
+        temp = Variables( None, size = variable.size )
+
+        expressionRender( result = temp, expression = expression )
+
+        method.copyVariables( src = temp, dest = variable )
+
+        temp.remove()
+
+    return method.getCode()
         
 
 def compile( code: str, debug: bool ) -> str:
@@ -51,7 +72,8 @@ def compile( code: str, debug: bool ) -> str:
         if debug:
             print( f"{ cnt }> { block }" )
 
-            resultCode += execute( block = block )
+        method.clearCode()
+        resultCode += execute( block = block )
         
         cnt += 1
 
