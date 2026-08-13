@@ -1,11 +1,11 @@
 from variables import Variables
 
-MEM_SIZE = 256
-
 class Methods:
-    def __init__( self ):
+    def __init__( self, MEM_SIZE: int ):
         self.cursor = 0
         self.code = ""
+
+        self.MEM_SIZE = MEM_SIZE
 
 
     def setCursor( self, index: int ):
@@ -14,7 +14,7 @@ class Methods:
 
 
     def addValue( self, value: int ):
-        self.addCode( '+' * value )
+        self.addCode( '+' * value + '-' * ( -value ) )
 
 
     def clearValue( self ):
@@ -40,33 +40,43 @@ class Methods:
 
     def move( self, src: int, dests: list[ int ] ):
         body = []
+
         for dest in sorted( dests ):
             body.append( ( self.setCursor, { 'index': dest } ) )
             body.append( ( self.addValue, { 'value': 1 } ) )
+
         body.append( ( self.setCursor, { 'index': src } ) )
+        body.append( ( self.addValue, { 'value': -1 } ) )
 
         self.cycle( head = src, body = body )
 
 
     def copy( self, src: int, dests: list[ int ], temp: int ):
-        self.move( src = src, dests = dests + [ temp ])
+        self.move( src = src, dests = dests + [ temp ] )
+        self.move( src = temp, dests = [ src ] )
+
+
+    def moveVariables( self, src: Variables, dest: Variables ):
+        for i in range( min( src.size, dest.size ) ):
+            self.move( src = src.index + i, dests = [ dest.index + i ] ) 
 
 
     def copyVariables( self, src: Variables, dest: Variables ):
         temp = Variables( None, 1 )
 
         for i in range( min( src.size, dest.size ) ):
-            self.copy( src = src.index, dests = [ dest.index ], temp = temp.index )
+            self.copy( src = src.index + i, dests = [ dest.index + i ], temp = temp.index ) 
 
         temp.remove()
 
 
     def addValueForVariable( self, var: Variables, value: int ):
         i = 0
-        while value % MEM_SIZE and i < var.size:
+        while value % self.MEM_SIZE and i < var.size:
             self.setCursor( index = var.index + i )
             self.addValue( value % 256 )
             value //= 256 
+            i += 1
 
 
     def clearCode( self ):

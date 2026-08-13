@@ -3,7 +3,9 @@ from methods import Methods
 from variables import Variables
 
 
-method = Methods()
+MEM_SIZE = 256 
+
+method = Methods( MEM_SIZE = MEM_SIZE)
 
 
 def blocking( code: str ) -> list[ str ]:
@@ -53,7 +55,7 @@ def execute( block: str ) -> str:
 
         expressionRender( result = temp, expression = expression )
 
-        method.copyVariables( src = temp, dest = variable )
+        method.moveVariables( src = temp, dest = variable )
 
         temp.remove()
 
@@ -79,5 +81,55 @@ def compile( code: str, debug: bool ) -> str:
 
     if debug:
         print( '\n'.join( [ variable.__str__() for variable in Variables.memory ] ) )
+        runCode( resultCode )
 
     return resultCode
+
+
+def runCode( code: str ):
+    mem = [ 0 ]
+    cursor = 0
+    i = 0
+    while i < len( code ):
+        match code[ i ]:
+            case '>':
+                if cursor >= len( mem ) - 1:
+                    mem.append( 0 )
+                cursor += 1
+            case '<':
+                if cursor == 0:
+                    raise IndexError
+                cursor -= 1
+            case '+':
+                mem[ cursor ] = ( mem[ cursor ] + 1 ) % MEM_SIZE
+            case '-':
+                mem[ cursor ] -= 1
+            case '[':
+                if not mem[ cursor ]:
+                    openBrackets = 0
+                    for j in range( i + 1, len( code ) ):
+                        if code[ j ] == '[':
+                            openBrackets += 1
+                        elif code[ j ] == ']' and openBrackets == 0:
+                            i = j
+                            break
+                        elif code[ j ] == ']':
+                            openBrackets -= 1
+            case ']':
+                if mem[ cursor ]:
+                    closeBrackets = 0
+                    for j in range( i - 1, -1, -1 ):
+                        if code[ j ] == ']':
+                            closeBrackets += 1
+                        elif code[ j ] == '[' and closeBrackets == 0:
+                            i = j
+                            break
+                        elif code[ j ] == '[':
+                            closeBrackets -= 1
+            case '.':
+                print( chr( mem[ cursor ] ) )
+            case ',':
+                mem[ cursor ] = ord( input() )
+        i += 1
+
+        print( ''.join( [ f"<{ mem[ i ] }>" if i == cursor else f"[{ mem[ i ] }]" for i in range( len( mem ) ) ] ) )
