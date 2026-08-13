@@ -1,4 +1,5 @@
 import re
+from variables import Variables
 
 def blocking( code: str ) -> list[ str ]:
     openBrackets = 0
@@ -27,8 +28,16 @@ def clearCode( code: str ) -> str:
 
 
 def execute( block: str ) -> str:
-    pass
+    result = ''
+    if re.fullmatch( r"def\[\d+\]\s+\w+", block ):
+        size, name = re.match( r"def\[(\d+)\]\s+(\w+)", block ).groups()
+        Variables( name = name, size = int( size ) )
+    elif re.fullmatch( r"del\s+\w+", block ):
+        name = re.match( r"del\s+(\w+)", block ).groups()[ 0 ]
+        Variables.getByName( name = name ).remove()
 
+    return result
+        
 
 def compile( code: str, debug: bool ) -> str:
     resultCode = ""
@@ -45,5 +54,8 @@ def compile( code: str, debug: bool ) -> str:
             resultCode += execute( block = block )
         
         cnt += 1
+
+    if debug:
+        print( '\n'.join( [ variable.__str__() for variable in Variables.memory ] ) )
 
     return resultCode
