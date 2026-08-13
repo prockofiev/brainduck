@@ -1,5 +1,7 @@
 import sys
+from compile import compile
 from helpOutput import helpOutput, versionOutput
+
 
 
 if __name__ == "__main__":
@@ -22,3 +24,8 @@ if __name__ == "__main__":
             versionOutput()
             exit( 0 )
 
+    with open( inputFileName, 'r', encoding = "utf-8" ) as file:
+        resultCode = compile( code = file.read(), debug = debug )
+
+    with open( outputFileName, 'w', encoding = "utf-8" ) as file:
+        file.write( resultCode )
