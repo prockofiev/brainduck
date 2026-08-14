@@ -38,6 +38,12 @@ def expressionRender( result: Variables, expression: str ):
     if re.fullmatch( r"\d+", expression ):
         value = re.match( r"(\d+)", expression ).groups()[ 0 ]
         method.addValueForVariable( var = result, value = int( value ) )
+    elif re.fullmatch( r"\w+", expression ):
+        name = re.match( r"(\w+)", expression ).groups()[ 0 ]
+        
+        variable = Variables.getByName( name )
+
+        method.copyVariables( src = variable, dest = result )
 
 
 def execute( block: str ) -> str:
