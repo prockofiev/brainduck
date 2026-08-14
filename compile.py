@@ -3,9 +3,7 @@ from methods import Methods
 from variables import Variables
 
 
-MEM_SIZE = 256 
-
-method = Methods( MEM_SIZE = MEM_SIZE)
+method = Methods()
 
 
 def blocking( code: str ) -> list[ str ]:
@@ -34,8 +32,75 @@ def clearCode( code: str ) -> str:
     return code
 
 
-def expressionRender( result: Variables, expression: str ):
-    if re.fullmatch( r"\d+", expression ):
+def expressionBlocking( block: str ) -> list:
+
+    if '(' not in block:
+        return block.strip(' ')
+    
+    blocks = [ '', '', '' ]
+
+    openBreackets = 0
+    flag1 = False
+    flag2 = False
+    flag3 = False
+    for char in block:
+        if char == '(':
+            if openBreackets == 0:
+                if not flag1 and not flag2 and not flag3:
+                    flag1 = True
+                elif not flag1 and flag2 and not flag3:
+                    flag2 = False
+                    flag3 = True
+            else:
+                if flag1:   blocks[ 0 ] += char
+                elif flag2: blocks[ 1 ] += char
+                elif flag3: blocks[ 2 ] += char
+
+            openBreackets += 1
+        elif char == ')':
+            if openBreackets == 1:
+                if flag1 and not flag2 and not flag3:
+                    flag1 = False
+                    flag2 = True
+                elif not flag1 and not flag2 and flag3:
+                    break
+            else:
+                if flag1:   blocks[ 0 ] += char
+                elif flag2: blocks[ 1 ] += char
+                elif flag3: blocks[ 2 ] += char
+
+            openBreackets -= 1
+        else:
+            if flag1:   blocks[ 0 ] += char
+            elif flag2: blocks[ 1 ] += char
+            elif flag3: blocks[ 2 ] += char
+
+    if flag2:
+        return [ blocks[ 0 ] ]
+
+    return [ expressionBlocking( blocks[ 0 ] ), blocks[ 1 ].strip(), expressionBlocking( blocks[ 2 ] ) ]
+
+
+
+
+def expressionRender( result: Variables, expression: list | str ):
+    if type( expression ) == list:
+        match expression[ 1 ]:
+            case '+':
+                temp1 = Variables( name = None, size = result.size )
+                temp2 = Variables( name = None, size = result.size )
+
+                expressionRender( result = temp1, expression = expression[ 0 ] )
+                expressionRender( result = temp2, expression = expression[ 2 ] )
+
+                method.sumVariables( var1 = temp1, var2 = temp2, result = result )
+
+                method.clearVariable( temp1 )
+                temp1.remove()
+                method.clearVariable( temp2 )
+                temp2.remove()
+
+    elif re.fullmatch( r"\d+", expression ):
         value = re.match( r"(\d+)", expression ).groups()[ 0 ]
         method.addValueForVariable( var = result, value = int( value ) )
     elif re.fullmatch( r"\w+", expression ):
@@ -50,6 +115,9 @@ def expressionRender( result: Variables, expression: str ):
         variable = Variables.getByName( name = name )
 
         method.addValueForVariable( var = result, value = variable.index)
+    else:
+        print( f"Выражение не распознано: { expression }" )
+
     
 
 
@@ -66,16 +134,15 @@ def execute( block: str ) -> str:
         variable = Variables.getByName( name = name )
         temp = Variables( None, size = variable.size )
 
-        expressionRender( result = temp, expression = expression )
+        expressionRender( result = temp, expression = expressionBlocking( block = expression ) )
 
         method.moveVariables( src = temp, dest = variable )
 
         temp.remove()
-
     return method.getCode()
         
 
-def compile( code: str, debug: bool ) -> str:
+def compile( code: str, debug: bool, onlyResult: bool ) -> str:
     resultCode = ""
 
     code = clearCode( code = code )
@@ -84,22 +151,23 @@ def compile( code: str, debug: bool ) -> str:
 
     cnt = 1
     for block in blocks:
-        if debug:
-            print( f"{ cnt }> { block }" )
+        if block:
+            if debug:
+                print( f"{ cnt }> { block }" )
 
-        method.clearCode()
-        resultCode += execute( block = block )
-        
-        cnt += 1
+            method.clearCode()
+            resultCode += execute( block = block )
+            
+            cnt += 1
 
     if debug:
         print( '\n'.join( [ variable.__str__() for variable in Variables.memory ] ) )
-        runCode( resultCode )
-
+        runCode( resultCode, onlyResult = onlyResult )
+            
     return resultCode
 
 
-def runCode( code: str ):
+def runCode( code: str, onlyResult: bool ):
     mem = [ 0 ]
     cursor = 0
     i = 0
@@ -114,7 +182,7 @@ def runCode( code: str ):
                     raise IndexError
                 cursor -= 1
             case '+':
-                mem[ cursor ] = ( mem[ cursor ] + 1 ) % MEM_SIZE
+                mem[ cursor ] = ( mem[ cursor ] + 1 ) % 2
             case '-':
                 mem[ cursor ] -= 1
             case '[':
@@ -144,5 +212,8 @@ def runCode( code: str ):
             case ',':
                 mem[ cursor ] = ord( input() )
         i += 1
-
+        if not onlyResult:
+            print( ''.join( [ f"<{ mem[ i ] }>" if i == cursor else f"[{ mem[ i ] }]" for i in range( len( mem ) ) ] ) )
+    if onlyResult:
         print( ''.join( [ f"<{ mem[ i ] }>" if i == cursor else f"[{ mem[ i ] }]" for i in range( len( mem ) ) ] ) )
+       

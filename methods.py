@@ -1,11 +1,9 @@
 from variables import Variables
 
 class Methods:
-    def __init__( self, MEM_SIZE: int ):
+    def __init__( self):
         self.cursor = 0
         self.code = ""
-
-        self.MEM_SIZE = MEM_SIZE
 
 
     def setCursor( self, index: int ):
@@ -14,7 +12,7 @@ class Methods:
 
 
     def addValue( self, value: int ):
-        self.addCode( '+' * value + '-' * ( -value ) )
+        self.addCode( '+' * ( value % 2 ) )
 
 
     def clearValue( self ):
@@ -56,6 +54,33 @@ class Methods:
         self.move( src = temp, dests = [ src ] )
 
 
+    def summ( self, i1: int, i2: int, i3: int, y1: int, y2: int ):
+        temp = Variables( name = None, size = 10 )
+
+        for i in range( 3 ):
+            self.setCursor( index = temp.index + i )
+            self.addValue( value = 1 )
+
+        for i, el in enumerate( [ i1, i2, i3 ] ):
+            self.copy( src = el, dests = [ temp.index + 4 + i ], temp = temp.index + 3 )
+
+        self.setCursor( temp.index + 4 )
+
+        
+        self.addCode( "[>>>>+<<<<<]<[>]>>[>>>+<<<<<]<<[>]>>>[>>+<<<<<]<<<[>]>[>]+[<]>>>>>[+<+>>+<]>[+<+>]<<+<+<+<[>]<+<<<<[>]" )
+        self.cursor = temp.index + 3
+
+        self.setCursor( index = y1 )
+        self.clearValue()
+        self.move( src = temp.index + 8, dests = [ y1 ] )
+        self.setCursor( index = y2 )
+        self.clearValue()
+        self.move( src = temp.index + 7, dests = [ y2 ] )
+
+        self.clearVariable( temp )
+        temp.remove()
+        
+
     def moveVariables( self, src: Variables, dest: Variables ):
         for i in range( min( src.size, dest.size ) ):
             self.move( src = src.index + i, dests = [ dest.index + i ] ) 
@@ -72,12 +97,28 @@ class Methods:
 
     def addValueForVariable( self, var: Variables, value: int ):
         i = 0
-        while value % self.MEM_SIZE and i < var.size:
-            self.setCursor( index = var.index + i )
-            self.addValue( value % 256 )
-            value //= 256 
+        while value > 0 and i < var.size:
+            self.setCursor( index = var.index + var.size - i - 1 )
+            self.addValue( value % 2 )
+            value //= 2
             i += 1
 
+
+    def clearVariable( self, var: Variables ):
+        for i in range( var.size ):
+            self.setCursor( var.index + i )
+            self.clearValue()
+
+
+    def sumVariables( self, var1: Variables, var2: Variables, result: Variables ):
+        temp = Variables( name = None, size = 1 )
+
+        for i in range( var1.size -1, -1, -1 ):
+            self.summ( i1 = var1.index + i, i2 = var2.index + i, i3 = temp.index, y1 = result.index + i, y2 = temp.index )
+
+       
+        self.clearVariable( temp )
+        temp.remove()
 
     def clearCode( self ):
         self.code = ""
