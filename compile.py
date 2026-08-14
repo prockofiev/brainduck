@@ -40,10 +40,17 @@ def expressionRender( result: Variables, expression: str ):
         method.addValueForVariable( var = result, value = int( value ) )
     elif re.fullmatch( r"\w+", expression ):
         name = re.match( r"(\w+)", expression ).groups()[ 0 ]
-        
-        variable = Variables.getByName( name )
+
+        variable = Variables.getByName( name = name )
 
         method.copyVariables( src = variable, dest = result )
+    elif re.fullmatch( r"&w+", expression ):
+        name = re.match( r"&(\w+)", expression ).groups()[ 0 ]
+
+        variable = Variables.getByName( name = name )
+
+        method.addValueForVariable( var = result, value = variable.index)
+    
 
 
 def execute( block: str ) -> str:
