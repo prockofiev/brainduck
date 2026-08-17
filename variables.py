@@ -26,20 +26,12 @@ class Variables:
         self.memory.remove( self )
 
     @staticmethod
-    def getByName( name: str ) -> Variables | None:
+    def get_by_name( name: str ) -> Variables | None:
         for variable in Variables.memory:
             if variable.name == name:
                 return variable
 
         return None
 
-    @staticmethod
-    def getByIndex( index: int ) -> Variables | None:
-        for variable in Variables.memory:
-            if variable.index == index:
-                return variable
-
-        return None
-
     def __str__( self ):
-        return f"Name: { self.name } Index: { self.index }  Size: { self.size }"
+        return f"Name: { self.name }    Size: { self.size }    Index: { self.index }"
