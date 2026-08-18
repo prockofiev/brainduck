@@ -79,4 +79,4 @@ class Brainfuck:
                 print( f"{ code [ i - 1 ] } " + " ".join( [ f"\033[1;31m<{ self.memory[ j ] }>\033[0m" if j == self.cursor else f"\033[2m[{ self.memory[ j ] }]\033[0m" for j in range( min( len( self.memory), self.SHOW_MEMORY ) ) ] ) )
 
         if self.DEBUG or self.ONLY_RESULT:
-            print( f"{ code[ i - 1 ] } " + " ".join( [ f"\033[1;31m<{ self.memory[ j ] }>\033[0m" if j == self.cursor else f"\033[2m[{ self.memory[ j ] }]\033[0m" for j in range( min( len( self.memory), self.SHOW_MEMORY ) ) ] ) )
+            print( " ".join( [ f"\033[1;31m<{ self.memory[ j ] }>\033[0m" if j == self.cursor else f"\033[2m[{ self.memory[ j ] }]\033[0m" for j in range( min( len( self.memory), self.SHOW_MEMORY ) ) ] ) )

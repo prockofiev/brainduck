@@ -69,3 +69,12 @@ def expression_blocking( block: str ) -> list | str:
         return [ b0 ]
 
     return [ expression_blocking( b0 ), b1.strip(), expression_blocking( b2 ) ]
+
+
+def optimizer_code( code: str ):
+    while '><' in code or '<>' in code and '++' in code:
+        code = code.replace( '><', '' )
+        code = code.replace( '<>', '' )
+        code = code.replace( '++', '' )
+
+    return code

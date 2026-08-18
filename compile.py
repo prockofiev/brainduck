@@ -2,7 +2,7 @@ import re
 from methods import Methods
 from variables import Variables
 from brainfuck import Brainfuck
-from render_code import clear_code, blocking, expression_blocking
+from render_code import clear_code, blocking, expression_blocking, optimizer_code
 
 
 class Compile:
@@ -22,6 +22,11 @@ class Compile:
 
         for block in blocks:
             self.execute( block = block )
+
+        start_len = len( self.method.code.get_code() )
+        self.method.code.code = optimizer_code( self.method.code.get_code() )
+        if self.DEBUG:
+            print( f"До: { start_len }      После: { len( self.method.code.get_code() ) }   ({ round( len( self.method.code.get_code() ) / start_len, 4 ) })" )
 
         self.intepreter.run_code( code_obj = self.method.get_code() )
         
@@ -48,6 +53,7 @@ class Compile:
 
             self.expression_render( result = temp, expression = expression_blocking( block = expression ) )
 
+            self.method.clear_variable( var = variable )
             self.method.move_variables( src = temp, dest = variable )
 
             temp.remove()
