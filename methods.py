@@ -121,10 +121,16 @@ class Methods:
         temp.remove()
         
 
+    def invert_variable( self, var: Variables ):
+        for i in range( var.size ):
+            self.set_cursor( var.index + i )
+            self.add_value( value = 1 )
+
+
     def clear_variable( self, var: Variables ):
-            for i in range( var.size ):
-                self.set_cursor( var.index + i )
-                self.clear_value()
+        for i in range( var.size ):
+            self.set_cursor( var.index + i )
+            self.clear_value()
 
 
     def move_variables( self, src: Variables, dest: Variables ):

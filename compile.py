@@ -37,15 +37,15 @@ class Compile:
 
 
     def execute( self, block: str ) -> str:
-        if re.fullmatch( r"def\[\d+\]\s+\w+", block ):
+        if re.fullmatch( r"def\[\d+\]\s*\w+", block ):
             size, name = re.match( r"def\[(\d+)\]\s+(\w+)", block ).groups()
             Variables( name = name, size = int( size ) )
 
-        elif re.fullmatch( r"del\s+\w+", block ):
+        elif re.fullmatch( r"del\s*\w+", block ):
             name = re.match( r"del\s+(\w+)", block ).groups()[ 0 ]
             Variables.get_by_name( name = name ).remove()
 
-        elif re.fullmatch( r"\w+\s+=\s+.+", block ):
+        elif re.fullmatch( r"\w+\s*=\s*.+", block ):
             name, expression = re.match( r"(\w+)\s+=\s+(.+)", block ).groups()
 
             variable = Variables.get_by_name( name = name )
@@ -91,12 +91,27 @@ class Compile:
 
             self.method.copy_variables( src = variable, dest = result )
 
-        elif re.fullmatch( r"&w+", expression ):
+        elif re.fullmatch( r"&\w+", expression ):
             name = re.match( r"&(\w+)", expression ).groups()[ 0 ]
 
             variable = Variables.get_by_name( name = name )
 
-            self.method.add_value_for_variable( var = result, value = variable.index)
+            self.method.add_value_for_variable( var = result, value = variable.index )
+
+        elif re.fullmatch( r"\-\w+", expression ):
+            name = re.match( r"\-(\w+)", expression ).groups()[ 0 ]
+            
+            
+            variable = Variables.get_by_name( name = name )
+            temp = Variables( name = None, size = variable.size )
+            self.method.add_value_for_variable( var = temp, value = 1 )
+
+            self.method.copy_variables( src = variable, dest = result )
+            self.method.invert_variable( var = result )
+            self.method.sum_variables( var1 = temp, var2 = result, result = result )
+
+            self.method.clear_variable( temp )
+            temp.remove()
 
         else:
-            print( f"Выражение не распознано: { expression }" )
+            print( f"Выражение не распознано: '{ expression }'" )
