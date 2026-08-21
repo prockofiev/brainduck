@@ -81,17 +81,31 @@ class Methods:
         self.add_code( ']' )
 
 
+    def condition( self, head: int, body: list[ tuple[ function, dict ] ] ):
+        temp = Variables( name = None, size = 1 )
+        self.copy( src = head, dests = [ temp.index ] )
+        body.append( ( self.set_value_for_index, { 'index': temp.index, 'value': 0 } ) )
+        self.cycle( head = temp.index, body = body )
+        temp.remove()
+
+
     def move( self, src: int, dests: list[ int ] ):
-        body = [ ( self.add_value_for_index, { 'value': 1, 'index': dest } ) for dest in sorted( dests )]
+        body = [ ( self.add_value_for_index, { 'value': 1, 'index': dest } ) for dest in sorted( dests ) ]
 
         body.append( ( self.add_value_for_index, { 'value': -1, 'index': src } ) )
 
         self.cycle( head = src, body = body )
 
 
-    def copy( self, src: int, dests: list[ int ], temp: int ):
-        self.move( src = src, dests = dests + [ temp ] )
-        self.move( src = temp, dests = [ src ] )
+    def copy( self, src: int, dests: list[ int ], temp: int = None ):
+        if temp:
+            self.move( src = src, dests = dests + [ temp ] )
+            self.move( src = temp, dests = [ src ] )
+        else:
+            temp = Variables( name = None, size = 1 )
+            self.move( src = src, dests = dests + [ temp.index ] )
+            self.move( src = temp.index, dests = [ src ] )
+            temp.remove()
 
 
     def summ( self, i1: int, i2: int, i3: int, y1: int, y2: int ):
@@ -119,12 +133,20 @@ class Methods:
 
         self.clear_variable( temp )
         temp.remove()
-        
+
 
     def invert_variable( self, var: Variables ):
         for i in range( var.size ):
             self.set_cursor( var.index + i )
             self.add_value( value = 1 )
+
+
+    def check_variable( self, var: Variables, result: Variables ):
+        self.add_value_for_variable( var = result, value = 1 )
+        for i in range( var.size ):
+            self.condition( head = var.index + i, body = [ ( self.set_value_for_index, { 'index': result.index, 'value': 0 } ) ] )
+
+        self.invert_variable( var = result )
 
 
     def clear_variable( self, var: Variables ):
