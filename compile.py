@@ -152,6 +152,24 @@ class Compile:
                     self.method.clear_variable( var = head )
                     head.remove()
 
+                case '!=':
+                    temp3 = Variables( name = None, size = result.size )
+                    temp4 = Variables( name = None, size = result.size )
+                    head = Variables( name = None, size = 1 )
+
+                    self.method.change_the_sign_variable( var = temp2, result = temp3 )
+
+                    self.method.sum_variables( var1 = temp1, var2 = temp3, result = temp4 )
+                    self.method.check_variable( var = temp4, result = head )
+                    self.method.copy_variables( src = head, dest = result )
+
+                    self.method.clear_variable( var = temp3 )
+                    temp3.remove()
+                    self.method.clear_variable( var = temp4 )
+                    temp4.remove()
+                    self.method.clear_variable( var = head )
+                    head.remove()
+
             self.method.clear_variable( temp1 )
             temp1.remove()
             self.method.clear_variable( temp2 )

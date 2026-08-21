@@ -1,8 +1,8 @@
-def[64] text;
+def[168] text;
 def[8] choice;
 def[8] temp;
 
-text = "Y or N?\n";
+text = "Y or N [default: Y]?\n";
 .output << text;
 
 .input >> choice;
@@ -13,7 +13,7 @@ if (temp) {
     .output << text;
 };
 
-temp = (choice) == ("N");
+temp = (choice) != ("Y");
 if (temp) {
     text = "\nNo!\n";
     .output << text;
