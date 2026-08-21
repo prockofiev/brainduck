@@ -61,13 +61,10 @@ class Brainfuck:
                             else:
                                 closeBrackets -= 1
             elif char == '.':
-                if len( output_stream ) == 8:
-                    print( chr( int( output_stream, 2 ) ), end = '', flush = True )
-                    output_stream = ''
-                else:
-                    output_stream += self.memory[ self.cursor ]
+                output_stream += str( self.memory[ self.cursor ] )
             elif char == ',':
-                input_stream += ''.join( [ bin( ord( char ) ).zfill( 8 ) for char in input() ] )
+                if input_stream == '':
+                    input_stream += ''.join( [ bin( ord( char ) )[ 2: ].zfill( 8 ) for char in input() ] )
                 self.memory[ self.cursor ] = int( input_stream[ 0 ] )
                 if len( input_stream ) > 1:
                     input_stream = input_stream[ 1: ]
@@ -75,6 +72,11 @@ class Brainfuck:
                     input_stream = ''
 
             i += 1
+
+            if len( output_stream ) == 8:
+                print( chr( int( output_stream, 2 ) ), end = '', flush = True )
+                output_stream = ''
+                
             if self.DEBUG and not self.ONLY_RESULT:
                 print( f"{ code [ i - 1 ] } " + " ".join( [ f"\033[1;31m<{ self.memory[ j ] }>\033[0m" if j == self.cursor else f"\033[2m[{ self.memory[ j ] }]\033[0m" for j in range( min( len( self.memory), self.SHOW_MEMORY ) ) ] ) )
 

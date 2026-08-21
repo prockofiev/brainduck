@@ -108,6 +108,26 @@ class Methods:
             temp.remove()
 
 
+    def set_input_for_index( self, index: int ):
+        self.set_cursor( index = index )
+        self.add_code( ',' )
+
+
+    def set_input_for_variable( self, var: Variables ):
+        for i in range( var.size ):
+            self.set_input_for_index( index = var.index + i )
+
+
+    def output_for_index( self, index: int ):
+        self.set_cursor( index = index )
+        self.add_code( '.' )
+
+
+    def output_for_variable( self, var: Variables ):
+        for i in range( var.size ):
+            self.output_for_index( index = var.index + i )
+
+
     def summ( self, i1: int, i2: int, i3: int, y1: int, y2: int ):
         temp = Variables( name = None, size = 10 )
 
@@ -139,6 +159,18 @@ class Methods:
         for i in range( var.size ):
             self.set_cursor( var.index + i )
             self.add_value( value = 1 )
+
+
+    def change_the_sign_variable( self, var: Variables, result: Variables ):
+        temp = Variables( name = None, size = var.size )
+        self.add_value_for_variable( var = temp, value = 1 )
+
+        self.copy_variables( src = var, dest = result )
+        self.invert_variable( var = result )
+        self.sum_variables( var1 = temp, var2 = result, result = result )
+
+        self.clear_variable( temp )
+        temp.remove()
 
 
     def check_variable( self, var: Variables, result: Variables ):

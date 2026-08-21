@@ -1,7 +1,20 @@
-def[4] a;
-def[4] b;
+def[64] text;
+def[8] choice;
+def[8] temp;
 
-a = 8;
-if (a) {
-    b = 9;
+text = "Y or N?\n";
+.output << text;
+
+.input >> choice;
+
+temp = (choice) == ("Y");
+if (temp) {
+    text = "\nYes!\n";
+    .output << text;
+};
+
+temp = (choice) == ("N");
+if (temp) {
+    text = "\nNo!\n";
+    .output << text;
 };

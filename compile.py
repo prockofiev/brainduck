@@ -104,6 +104,18 @@ class Compile:
             self.method.add_code( ']' ) 
 
             condition.remove()
+
+        elif re.fullmatch( r"\.input\s+>>\s+\w+", block ):
+            name = re.match( r"\.input\s+>>\s+(\w+)", block ).groups()[ 0 ]
+
+            variable = Variables.get_by_name( name = name )
+            self.method.set_input_for_variable( var = variable )
+
+        elif re.fullmatch( r"\.output\s+<<\s+\w+", block ):
+            name = re.match( r"\.output\s+<<\s+(\w+)", block ).groups()[ 0 ]
+
+            variable = Variables.get_by_name( name = name )
+            self.method.output_for_variable( var = variable )
         
         return self.method.get_code()
 
@@ -121,6 +133,24 @@ class Compile:
                     self.method.sum_variables( var1 = temp1, var2 = temp2, result = result )
                 case '*':
                     self.method.multiplication_variables( var1 = temp1, var2 = temp2, result = result )
+                case '==':
+                    temp3 = Variables( name = None, size = result.size )
+                    temp4 = Variables( name = None, size = result.size )
+                    head = Variables( name = None, size = 1 )
+
+                    self.method.change_the_sign_variable( var = temp2, result = temp3 )
+
+                    self.method.sum_variables( var1 = temp1, var2 = temp3, result = temp4 )
+                    self.method.check_variable( var = temp4, result = head )
+                    self.method.invert_variable( var = head )
+                    self.method.copy_variables( src = head, dest = result )
+
+                    self.method.clear_variable( var = temp3 )
+                    temp3.remove()
+                    self.method.clear_variable( var = temp4 )
+                    temp4.remove()
+                    self.method.clear_variable( var = head )
+                    head.remove()
 
             self.method.clear_variable( temp1 )
             temp1.remove()
@@ -148,17 +178,14 @@ class Compile:
         elif re.fullmatch( r"\-\w+", expression ):
             name = re.match( r"\-(\w+)", expression ).groups()[ 0 ]
             
-            
             variable = Variables.get_by_name( name = name )
-            temp = Variables( name = None, size = variable.size )
-            self.method.add_value_for_variable( var = temp, value = 1 )
 
-            self.method.copy_variables( src = variable, dest = result )
-            self.method.invert_variable( var = result )
-            self.method.sum_variables( var1 = temp, var2 = result, result = result )
+            self.method.change_the_sign_variable( var = variable, result = result )
 
-            self.method.clear_variable( temp )
-            temp.remove()
+        elif re.fullmatch( r'\".+\"', expression ):
+            string = expression[ 1:-1 ].encode().decode('unicode_escape')
+
+            self.method.add_value_for_variable( var = result, value = int( ''.join( [ bin( ord( char ) )[ 2: ].zfill( 8 ) for char in string ] ), 2 ) )
 
         else:
             print( f"Выражение не распознано: '{ expression }'" )
