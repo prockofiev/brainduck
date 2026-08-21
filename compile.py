@@ -60,7 +60,6 @@ class Compile:
 
         elif re.fullmatch( r"while\s*\(.+\)\s*\{.+\}", block ):
             head, body = re.match( r"while\s*\((.+?)\) \{(.+)\}", block ).groups()
-            print( f"Head: { head }     Body: { body }" )
 
             variable = Variables.get_by_name( name = head )
             
@@ -77,6 +76,29 @@ class Compile:
 
             self.method.clear_variable( var = condition )
             self.method.check_variable( var = variable, result = condition )
+            self.method.set_cursor( index = condition.index )
+
+            self.method.add_code( ']' ) 
+
+            condition.remove()
+
+        elif re.fullmatch( r"if\s*\(.+\)\s*\{.+\}", block ):
+            head, body = re.match( r"if\s*\((.+?)\) \{(.+)\}", block ).groups()
+
+            variable = Variables.get_by_name( name = head )
+            
+            condition = Variables( name = None, size = 1 )
+
+            self.method.check_variable( var = variable, result = condition )
+            self.method.set_cursor( index = condition.index )
+
+            self.method.add_code( '[' )
+
+            blocks = blocking( code = body )
+            for block in blocks:
+                self.execute( block = block.strip() )
+
+            self.method.clear_variable( var = condition )
             self.method.set_cursor( index = condition.index )
 
             self.method.add_code( ']' ) 
