@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 
 def clear_code( code: str ) -> str:
@@ -71,10 +72,24 @@ def expression_blocking( block: str ) -> list | str:
     return [ expression_blocking( b0 ), b1.strip(), expression_blocking( b2 ) ]
 
 
-def optimizer_code( code: str ):
-    while '><' in code or '<>' in code and '++' in code:
-        code = code.replace( '><', '' )
-        code = code.replace( '<>', '' )
-        code = code.replace( '++', '' )
+def optimizer_code(code: str) -> str:
+    """Collapse adjacent no-op instruction pairs in Brainfuck.
 
+    In this dialect ``>`` followed by ``<`` (and vice versa) cancel out, and
+    two consecutive ``+`` cancel (the bit is toggled twice). Removes all such
+    pairs iteratively until the program is irreducible.
+
+    Args:
+        code: The raw Brainfuck program.
+
+    Returns:
+        The optimized program with no adjacent cancelling pairs.
+    """
+    prev = None
+    while prev != code:
+        prev = code
+        code = code.replace("><", "").replace("<>", "").replace("++", "")
+
+    # Collapse an odd run of consecutive '+' down to a single '+'.
+    code = re.sub(r"(\+)\1+", "+", code)
     return code
