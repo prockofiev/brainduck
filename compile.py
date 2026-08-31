@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 from methods import Methods
 from variables import Variables
@@ -21,19 +22,22 @@ class Compile:
         blocks = blocking( code = code )
 
         for block in blocks:
-            self.execute( block = block )
+            if block.strip():
+                self.execute(block=block.strip())
 
         start_len = len( self.method.code.get_code() )
         self.method.code.code = optimizer_code( self.method.code.get_code() )
         if self.DEBUG:
             print( f"До: { start_len }      После: { len( self.method.code.get_code() ) }   ({ round( len( self.method.code.get_code() ) / start_len, 4 ) })" )
 
-        self.intepreter.run_code( code_obj = self.method.get_code() )
-        
         if self.DEBUG:
             print( '\n'.join( [ variable.__str__() for variable in Variables.memory ] ) )
-                
+
         return self.method.get_code().get_code()
+
+    def run( self ) -> None:
+        """Execute the currently generated Brainfuck code via the interpreter."""
+        self.intepreter.run_code( code_obj = self.method.get_code() )
 
 
     def execute( self, block: str ) -> str:
@@ -41,9 +45,12 @@ class Compile:
             size, name = re.match( r"def\[(\d+)\]\s+(\w+)", block ).groups()
             Variables( name = name, size = int( size ) )
 
-        elif re.fullmatch( r"del\s*\w+", block ):
-            name = re.match( r"del\s+(\w+)", block ).groups()[ 0 ]
-            Variables.get_by_name( name = name ).remove()
+        elif re.fullmatch(r"del\s*\w+", block):
+                    name = re.match(r"del\s+(\w+)", block).groups()[0]
+                    variable = Variables.get_by_name(name=name)
+                    if variable is None:
+                        raise ValueError(f"Variable {name!r} is not defined")
+                    variable.remove()
 
         elif re.fullmatch( r"\w+\s*=\s*.+", block ):
             name, expression = re.match( r"(\w+)\s+=\s+(.+)", block ).groups()

@@ -115,3 +115,59 @@ def[1] e;
 
 Для реализации такого цикла, необходимо в каждой итерации проверять head на не равенство нулю. 
 Для того чтобы проверить равняется ли нулю все, необходимо снала их всех инвертировать, а потом использовать ```[>]```.
+
+---
+
+# Usage / CLI reference (English)
+
+BrainDuck ships as both a command-line tool and a Python library.
+
+## Command line
+
+```
+brainduck [-i INPUT] [-o OUTPUT] [--run] [-d] [-r] [-s N] [-v]
+```
+
+| Flag | Description |
+|------|-------------|
+| `-i, --input FILE` | Input `.bd` source file (default `input.bd`) |
+| `-o, --output FILE` | Output `.bf` file (default `output.bf`) |
+| `--run` | Also execute the compiled Brainfuck after writing it |
+| `-d, --debug` | Print per-step memory traces while compiling |
+| `-r, --result` | Print only the final memory state |
+| `-s, --show N` | Number of memory cells to display (default 100) |
+| `-v, --version` | Show version and exit |
+
+The CLI reports a clean error (exit code 1) if the input file is missing or
+compilation fails, instead of raising an unhandled traceback.
+
+## Library
+
+```python
+from compile import Compile
+
+compiler = Compile(DEBUG=False, ONLY_RESULT=False, SHOW_MEMORY=100)
+source = open("program.bd", encoding="utf-8").read()
+
+bf = compiler.compile(source)   # returns the generated Brainfuck string
+compiler.run()                  # optionally execute it via the interpreter
+```
+
+`Variables.memory` is a process-global registry (used as compiler state), so a
+long-lived process should reset `Variables.memory = []` between independent
+compilations.
+
+## Development
+
+```bash
+pip install -e ".[dev]"   # or: uv pip install -e ".[dev]"
+python -m pytest tests/   # run the offline test suite
+```
+
+## Notes
+
+- Compiler state lives in class attributes (`Variables.memory`), which is
+  convenient for the interpreter but means library users should reset it
+  between independent compilations.
+- The `del` instruction frees the *allocation* but intentionally does not
+  clear the values stored in the freed cells (documented language behaviour).
