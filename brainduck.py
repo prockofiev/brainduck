@@ -20,12 +20,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--input", "-i",
-        default="input.bd",
         help="input .bd source file (default: input.bd)",
     )
     parser.add_argument(
         "--output", "-o",
-        default="output.bf",
         help="output .bf file (default: output.bf)",
     )
     parser.add_argument(
@@ -59,6 +57,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        return 0
+    
     args = parser.parse_args(argv)
 
     try:
