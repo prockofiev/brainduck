@@ -118,10 +118,21 @@ class Compile:
             variable = Variables.get_by_name( name = name )
             self.method.set_input_for_variable( var = variable )
 
-        elif re.fullmatch( r"\.output\s+<<\s+\w+", block ):
-            name = re.match( r"\.output\s+<<\s+(\w+)", block ).groups()[ 0 ]
+        elif re.fullmatch( r"\.output\[\d+\]\s+<<\s+.+", block ):
+            size, value = re.match( r"\.output\[(\d+)\]\s+<<\s+(.+)", block ).groups()
+
+            temp = Variables( name = None, size = int( size ) )
+            self.expression_render( result = temp, expression = expression_blocking( block = value ) )
+            self.method.output_for_variable( var = temp )
+
+            self.method.clear_variable( var = temp )
+            temp.remove()
+
+        elif re.fullmatch( r"\.output\s+<<\s+w+", block ):
+            name = re.match( r"\.output\s+<<\s+(w+)", block ).groups()[ 0 ]
 
             variable = Variables.get_by_name( name = name )
+
             self.method.output_for_variable( var = variable )
         
         return self.method.get_code()
@@ -199,6 +210,17 @@ class Compile:
             variable = Variables.get_by_name( name = name )
 
             self.method.add_value_for_variable( var = result, value = variable.index )
+
+        elif re.fullmatch( r"\-\d+", expression):
+            temp = Variables( name = None, size = result.size )
+
+            number = re.match( r"\-(\d+)", expression ).groups()[ 0 ]
+            self.method.clear_variable( var = result )
+            self.method.add_value_for_variable( var = temp, value = int( number ) )
+            self.method.change_the_sign_variable( var = temp, result = result )
+
+            self.method.clear_variable( var = temp )
+            temp.remove()
 
         elif re.fullmatch( r"\-\w+", expression ):
             name = re.match( r"\-(\w+)", expression ).groups()[ 0 ]
