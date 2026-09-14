@@ -1,10 +1,10 @@
 # BrainDuck
 
 <p align="center">
-  <img src="icon.png" width="128" alt="BrainDuck">
+  <img src="icon.png" width="128" alt="BrainDuck"><br>
+  Это высокоуровневый язык программирования, который компилируется в код на BrainF*ck
 </p>
 
-Это высокоуровневый язык программирования, который компилируется в код на BrainF*ck.
 
 # Использование
 
