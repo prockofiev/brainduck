@@ -1,0 +1,41 @@
+def[8] outputX;
+def[8] outputSpace;
+def[8] y;
+def[8] x;
+def[8] break;
+def[8] temp;
+def[8] f;
+def[8] status;
+
+temp = 1;
+y = 20;
+x = 30;
+
+break = "\n";
+outputX = "X";
+outputSpace = " ";
+
+while (y) {
+    while (x) {
+        x = (x) + (-temp);
+        
+        f = x;
+        status = (f) == (y);
+
+        if (status) {
+            .output << outputX;
+        };
+
+        status = (f) != (y);
+
+        if (status) {
+            .output << outputSpace;
+        };
+
+    };
+
+    y = (y) + (-temp);
+    x = 30;
+
+    .output << break;
+};
